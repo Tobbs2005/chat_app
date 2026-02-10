@@ -4,11 +4,17 @@
   "main": "index.js",
   "license": "MIT",
   "private": "true",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "overrides": {
     "@chakra-ui/system": "1.8.2"
   },
   "scripts": {
     "start": "npm run start -w @whatsapp-clone/client"
+  },
+  "volta": {
+    "node": "16.20.2",
+    "npm": "8.19.4"
   }
 }
