@@ -20,8 +20,11 @@ const Chat = () => {
       textAlign="center"
       fontSize="lg"
     >
-      <TabPanels>
-        <Text>No friend :( Click add friend to start chatting</Text>
+      <TabPanels> 
+        <TabPanel>
+          <Text>No friend :( Click add friend to start chatting</Text>
+        </TabPanel>
+       
       </TabPanels>
     </VStack>
   );
