@@ -6,7 +6,8 @@ const cors = require("cors");
 const authRouter = require("./routers/authRouter");
 const { sessionMiddleware, wrap, corsConfig } = require("./controllers/serverController");
 const server = require("http").createServer(app);
-const { authorizeUser } = require("./controllers/socketController");
+const { authorizeUser, addFriend } = require("./controllers/socketController");
+const { initializeUser } = require("./controllers/socketController");
 require("dotenv").config();
 const io = new Server(server, {
   cors: corsConfig,
@@ -26,10 +27,12 @@ io.use(wrap(sessionMiddleware));
 io.use(authorizeUser);
 
 io.on("connect", socket => {
-  console.log(socket.request.session.user.username);
-});
+  initializeUser(socket);
 
+  socket.on("add_friend", (friendName, cb) => {
+    addFriend(socket, friendName, cb);
+  });
+});
 server.listen(4000, () => {
-  console.log(socket.user.userid);
   console.log("Server listening on port 4000");
 });
