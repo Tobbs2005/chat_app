@@ -56,7 +56,7 @@ module.exports.addFriend = async (socket, friendName, cb) => {
     return;
   }
 
-  await redisClient.lpush(`friends:${socket.user.username}`, [friendName, friendName.userid].join("."));
+  await redisClient.lpush(`friends:${socket.user.username}`, [friendName, friend.userid].join("."));
   const newFriend = {
     username: friendName,
     userid: friend.userid,

@@ -6,3 +6,6 @@ CREATE TABLE users(
 );
 
 INSERT INTO users(username, passhash) values($1,$2);
+
+DELETE FROM users;
+SELECT * FROM users;
