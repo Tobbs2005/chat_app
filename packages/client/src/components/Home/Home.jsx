@@ -10,7 +10,7 @@ export const MessageContext = createContext();
 const Home = () => {
   const [friendList, setFriendList] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [friendIndex, setFriendIndex] = useState();
+  const [friendIndex, setFriendIndex] = useState(0);
   useSocketSetup(setFriendList, setMessages);
   return (
     <FriendContext.Provider value={{ friendList, setFriendList }}>

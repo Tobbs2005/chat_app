@@ -27,6 +27,9 @@ const useSocketSetup = (setFriendList, setMessages) => {
       console.error(error);
       setUser({ loggedIn: false });
     })
+    socket.on("dm", (message)=>{
+      setMessages(prevMessages => [message, ...prevMessages]);
+    })
     return () => {
       socket.off("connect_error");
       socket.off("friends");

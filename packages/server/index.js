@@ -6,7 +6,7 @@ const cors = require("cors");
 const authRouter = require("./routers/authRouter");
 const { sessionMiddleware, wrap, corsConfig } = require("./controllers/serverController");
 const server = require("http").createServer(app);
-const { authorizeUser, addFriend, onDisconnect } = require("./controllers/socketController");
+const { authorizeUser, addFriend, onDisconnect, onDM } = require("./controllers/socketController");
 const { initializeUser } = require("./controllers/socketController");
 require("dotenv").config();
 const io = new Server(server, {
@@ -35,6 +35,10 @@ io.on("connect", socket => {
 
   socket.on("disconnecting", () => {
     onDisconnect(socket);
+  });
+
+  socket.on("dm", (message) => {
+    onDM(socket, message);
   });
 });
 server.listen(4000, () => {
