@@ -1,17 +1,19 @@
+require("dotenv").config();
 const express = require("express");
 const { Server } = require("socket.io");
 const app = express();
 const helmet = require("helmet");
 const cors = require("cors");
 const authRouter = require("./routers/authRouter");
+const filesRouter = require("./routers/filesRouter");
 const { sessionMiddleware, wrap, corsConfig } = require("./controllers/serverController");
 const server = require("http").createServer(app);
 const { authorizeUser, addFriend, onDisconnect, onDM } = require("./controllers/socketController");
 const { initializeUser } = require("./controllers/socketController");
-require("dotenv").config();
 const io = new Server(server, {
   cors: corsConfig,
 });
+app.set("trust proxy", 1);
 app.use(helmet());
 app.use(
   cors(corsConfig)
@@ -21,6 +23,7 @@ app.use(
   sessionMiddleware
 );
 app.use("/auth", authRouter);
+app.use("/files", filesRouter);
 
 io.use(wrap(sessionMiddleware));
 

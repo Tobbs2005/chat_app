@@ -1,5 +1,31 @@
 const redisClient = require("../redis");
 
+const parseStoredMessage = (storedMessage) => {
+  if (!storedMessage || typeof storedMessage !== "string") {
+    return null;
+  }
+
+  const trimmedMessage = storedMessage.trim();
+  if (trimmedMessage.startsWith("{")) {
+    try {
+      return JSON.parse(trimmedMessage);
+    } catch (error) {
+      console.error("Failed to parse JSON message:", error);
+    }
+  }
+
+  const parsedStr = storedMessage.split(".");
+  if (parsedStr.length < 3) {
+    return null;
+  }
+  return {
+    to: parsedStr[0],
+    from: parsedStr[1],
+    type: "text",
+    content: parsedStr.slice(2).join("."),
+  };
+};
+
 module.exports.authorizeUser = (socket, next) => {
   if (!socket.request.session || !socket.request.session.user) {
     console.log("Bad request!");
@@ -36,14 +62,9 @@ module.exports.initializeUser = async socket => {
 
   // fetch messages
   const messageQuery = await redisClient.lrange(`chat:${socket.user.userid}`, 0, -1);
-  const messages = messageQuery.map(message => {
-    const parsedStr = message.split(".");
-    return {
-      to: parsedStr[0],
-      from: parsedStr[1],
-      content: parsedStr[2],
-    };
-  });
+  const messages = messageQuery
+    .map(parseStoredMessage)
+    .filter(Boolean);
   if (messages.length > 0) {
     socket.emit("messages", messages);
   }
@@ -107,12 +128,17 @@ const parseFriendList = async (friendList) => {
 };
 
 module.exports.onDM = async (socket, message) => {
-  message.from = socket.user.userid;
+  const normalizedMessage = {
+    ...message,
+    from: socket.user.userid,
+    type: message?.type || "text",
+    timestamp: message?.timestamp || new Date().toISOString(),
+  };
 
-  const messageString = [message.to, message.from, message.content].join(".");
+  const messageString = JSON.stringify(normalizedMessage);
 
-  await redisClient.lpush(`chat:${message.to}`, messageString);
-  await redisClient.lpush(`chat:${message.from}`, messageString);
+  await redisClient.lpush(`chat:${normalizedMessage.to}`, messageString);
+  await redisClient.lpush(`chat:${normalizedMessage.from}`, messageString);
 
-  socket.to(message.to).emit("dm", message);
+  socket.to(normalizedMessage.to).emit("dm", normalizedMessage);
 }
